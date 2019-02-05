@@ -236,6 +236,11 @@ def _impl(ctx):
         # This is Bazel black magic, we're traversing the directories in the output_base,
         # assuming that the bazel_toolchains external repo will exist in the
         # expected path.
+
+        print(ctx.path(".").dirname)
+        result = ctx.execute(["ls", "-la", ctx.path(".").dirname])
+        print(result.stdout)
+
         project_root = ctx.path(".").dirname.get_child("bazel_toolchains").get_child("rules").get_child("cc-sample-project")
         if not project_root.exists:
             fail(("Could not find default autoconf project in %s, please make sure " +
@@ -490,7 +495,7 @@ def _run_and_extract(
         # If we use the default project, we need to modify the WORKSPACE
         # and BUILD files, so don't mount read-only
         mount_read_only_flag = ""
-    target = project_root + ":" + _REPO_DIR + mount_read_only_flag
+    target = "$(realpath " + project_root + "):" + _REPO_DIR + mount_read_only_flag
     docker_run_flags += ["-v", target]
     docker_run_flags += ["-v", str(ctx.path("container")) + ":/container"]
 
